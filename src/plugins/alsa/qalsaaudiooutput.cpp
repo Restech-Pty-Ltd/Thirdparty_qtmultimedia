@@ -48,6 +48,7 @@
 // INTERNAL USE ONLY: Do NOT use for any other purpose.
 //
 
+#include <QThread>
 #include <QtCore/qcoreapplication.h>
 #include <QtCore/qvarlengtharray.h>
 #include <QtMultimedia/private/qaudiohelpers_p.h>
@@ -327,12 +328,11 @@ bool QAlsaAudioOutput::open()
         dev = m_device;
 
     // Step 1: try and open the device
-    while((count < 5) && (err < 0)) {
+    while(err < 0) {
         err=snd_pcm_open(&handle,dev.toLocal8Bit().constData(),SND_PCM_STREAM_PLAYBACK,0);
-        if(err < 0)
-            count++;
+        QThread::msleep(10);
     }
-    if (( err < 0)||(handle == 0)) {
+    if (handle == 0) {
         errorState = QAudio::OpenError;
         emit errorChanged(errorState);
         deviceState = QAudio::StoppedState;
